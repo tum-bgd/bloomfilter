@@ -1,0 +1,6 @@
+build
+dist
+helena.egg-info
+tmp
+demo/modelnet10.h5
+__pycache__
