@@ -23,7 +23,7 @@ ext_modules = [
         'bgdbloomfilter',
         # Sort input source files to ensure bit-for-bit reproducible builds
         # (https://github.com/pybind/python_example/pull/53)
-        sorted(['src/main.cpp']),
+        sorted(['src/main.cpp','src/murmur.hpp']),
         include_dirs=[
             # Path to pybind11 headers
             get_pybind_include(),
