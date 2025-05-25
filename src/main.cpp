@@ -151,7 +151,7 @@ class BloomFilterFacade{
 
 
 
-PYBIND11_MODULE(bloomfilter, m) {
+PYBIND11_MODULE(bgdbloomfilter, m) {
     /**
      * NOT FOR PRODUCTIVITY - DEVELOPMENT ONLY
      * */
