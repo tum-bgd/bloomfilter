@@ -35,7 +35,7 @@ class BloomFilterFacade{
 	  hash_data.clear();
 	  for (int col=0; col < mat.shape(1); col++){
 		auto offset = mat.offset_at(row,col);
-		const char *p = static_cast<const char *>(data+offset);
+		const char *p = static_cast<const char *>(data)+offset;
 		for (size_t i=0; i < mat.itemsize(); i++)
 		   hash_data.push_back(*p++);
 	    }
