@@ -36,7 +36,7 @@ class BloomFilterFacade{
 	  for (int col=0; col < mat.shape(1); col++){
 		auto offset = mat.offset_at(row,col);
 		const char *p = static_cast<const char *>(data)+offset;
-		for (size_t i=0; i < mat.itemsize(); i++)
+		for (int i=0; i < mat.itemsize(); i++)
 		   hash_data.push_back(*p++);
 	    }
 	 return hash_data;
@@ -45,6 +45,7 @@ class BloomFilterFacade{
    public:
      size_t k,m;
      std::vector<bool> filter;
+     
 
      std::vector<unsigned char> debug_getrow(const py::array &mat, int row_index){
         auto row = row_as_array(mat,row_index);
@@ -61,7 +62,7 @@ class BloomFilterFacade{
     }
    
     void configure (size_t _k, size_t _m){
-          std::cout << "configuring " << _k <<"," << _m << std::endl;
+          
 	  k = _k; m=_m;
 	  filter.resize(m);
 	  for (size_t i=0; i < filter.size(); i++)
@@ -70,7 +71,7 @@ class BloomFilterFacade{
     void insert(py::array mat, int axis=0){
 	// axis not yet supported, maybe never
 	std::vector<unsigned char> hash_data;
-        auto data = mat.data();
+        
 	for (int item =0; item < mat.shape(0); item ++){
 	   hash_data = row_as_array(mat,item);
 	    uint64_t h1=8589845122,h2=8465418721;	    
@@ -89,8 +90,7 @@ class BloomFilterFacade{
         std::vector<bool> ret(mat.shape(0));
 	
 	std::vector<unsigned char> hash_data;
-        auto data = mat.data();
-	for (int item =0; item < mat.shape(0); item ++){
+        for (int item =0; item < mat.shape(0); item ++){
 	   ret [item] = true;
 	   
 	   hash_data = row_as_array(mat,item);
@@ -109,12 +109,13 @@ class BloomFilterFacade{
 	 return ret;
 
     }
-
-
+    
     void tobuffer(std::vector<char> &buf)
     {
 	buf.clear();
 	char ch=0;
+	  
+	// push data
 	for (size_t i=0; i<filter.size(); i++)
 	{
 	    auto bit = i %8;
@@ -127,6 +128,19 @@ class BloomFilterFacade{
 	}
 	if (filter.size() % 8 != 0)  // we have collected beyond the end.
 	  buf.push_back(ch);
+    }
+
+    void insert(const BloomFilterFacade &other){
+	if (other.m != m || other.k != k)
+	throw(std::runtime_error("Configuration Mismatch in union"));
+	for (size_t i=0; i < other.filter.size(); i++)
+	  if (other.filter[i]) filter[i] = true;
+    }
+    void intersect(const BloomFilterFacade &other){
+	if (other.m != m || other.k != k)
+	throw(std::runtime_error("Configuration Mismatch in intersect"));
+	for (size_t i=0; i < other.filter.size(); i++)
+	   filter[i] = other.filter[i] && filter[i];
     }
     
     void frombuffer(const std::vector<char> &buf, size_t _k, size_t n)
@@ -183,6 +197,14 @@ PYBIND11_MODULE(bgdbloomfilter, m) {
                  size_t length = static_cast<size_t>(info.size);
                  self.frombuffer(std::vector<char>(data, data + length),k,m);
 		})
+	     .def("union", +[](BloomFilterFacade &self, BloomFilterFacade &other){
+		self.insert(other);
+	     })
+	     .def("intersect", +[](BloomFilterFacade &self, BloomFilterFacade &other){
+		self.intersect(other);
+	     })
+	     .def("get_k",+[](BloomFilterFacade &self){return self.k;})
+	     .def("get_m",+[](BloomFilterFacade &self){return self.m;})
 	    
 	    ;
 
