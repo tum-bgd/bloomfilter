@@ -61,7 +61,7 @@ class BloomFilterFacade{
     }
    
     void configure (size_t _k, size_t _m){
-          std::cout << "configuring " << _k <<"," << _m << std::endl;
+          
 	  k = _k; m=_m;
 	  filter.resize(m);
 	  for (size_t i=0; i < filter.size(); i++)
@@ -111,7 +111,7 @@ class BloomFilterFacade{
     }
 
 
-    void tobuffer(std::vector<char> &buf)
+    void tobuffer(std::vector<char> &buf) const
     {
 	buf.clear();
 	char ch=0;
@@ -129,17 +129,14 @@ class BloomFilterFacade{
 	  buf.push_back(ch);
     }
     
-    void frombuffer(const std::vector<char> &buf, size_t _k, size_t n)
+    void frombuffer(const std::vector<char> &buf)
     {
-	this->k = _k;
-	this->m = n; 
-	filter.resize(n);
 	size_t k=0;
 	for (size_t i=0; i < buf.size(); i++)
 	{
 	    char ch = buf[i];
 	    for(size_t j=0; j < 8; j++)
-	      if (k < n)
+	      if (k < m)
 	        filter[k++] = ch & (1<<j);
 	
 	}
@@ -181,9 +178,27 @@ PYBIND11_MODULE(bloomfilter, m) {
 		 py::buffer_info info(py::buffer(bytedata).request());
                  const char *data = reinterpret_cast<const char *>(info.ptr);
                  size_t length = static_cast<size_t>(info.size);
-                 self.frombuffer(std::vector<char>(data, data + length),k,m);
+		 self.configure(k,m);
+                 self.frombuffer(std::vector<char>(data, data + length));
 		})
-	    
+	    .def(py::pickle(
+			    [](const BloomFilterFacade &p) { // __getstate__
+			      std::vector<char> out;
+			      p.tobuffer(out);
+			      return py::make_tuple(p.k, p.m,py::bytes(out.data(),out.size()));
+                              },
+			    [](py::tuple t) { // __setstate__
+			      if (t.size() != 3)
+				throw std::runtime_error("Invalid State in __setstate__");
+			      BloomFilterFacade bf;
+			      bf.configure(t[0].cast<int>(),t[1].cast<int>());
+			      py::buffer_info info(py::buffer(t[2]).request());
+			      const char *data = reinterpret_cast<const char *>(info.ptr);
+			      size_t length = static_cast<size_t>(info.size);
+			      bf.frombuffer(std::vector<char>(data, data + length));
+			      return bf;
+			    }
+		      ))
 	    ;
 
 
