@@ -3,7 +3,7 @@ from setuptools.command.build_ext import build_ext
 import sys
 import setuptools
 
-__version__ = '0.0.2' 
+__version__ = '0.0.4'
 
 
 class get_pybind_include(object):
@@ -20,7 +20,7 @@ class get_pybind_include(object):
 
 ext_modules = [
     Extension(
-        'bloomfilter',
+        'bgdbloomfilter',
         # Sort input source files to ensure bit-for-bit reproducible builds
         # (https://github.com/pybind/python_example/pull/53)
         sorted(['src/main.cpp']),
@@ -103,7 +103,7 @@ class BuildExt(build_ext):
 
 
 setup(
-    name='bloomfilter',
+    name='bgdbloomfilter',
     version=__version__,
     author='Martin Werner and contributors',
     author_email='martin.werner@tum.de',
