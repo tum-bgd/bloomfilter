@@ -37,3 +37,15 @@ x = np.array(["Gerne","will","ich", "mich", "bequemen"]).reshape(-1,1)
 print(f.test(x))
 x = np.array(["Kreuz","und","Becher", "anzunehmen"]).reshape(-1,1)
 print(f.test(x))
+
+
+### Test Pickle support
+import pickle
+pickle.dump(f, open("test.p","wb"))
+g = pickle.load(open("test.p","rb"))
+
+
+x = np.array(["Gerne","will","ich", "mich", "bequemen"]).reshape(-1,1)
+print(g.test(x))
+x = np.array(["Kreuz","und","Becher", "anzunehmen"]).reshape(-1,1)
+print(g.test(x))
