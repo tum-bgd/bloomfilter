@@ -110,6 +110,13 @@ class BloomFilterFacade{
 
     }
     
+    double foz (){
+       long ret = 0;
+       for (size_t i=0; i < filter.size(); i++)
+         if (filter[i])
+	   ret ++;
+	return static_cast<double> (ret) / filter.size();
+    }
     void tobuffer(std::vector<char> &buf)
     {
 	buf.clear();
@@ -142,6 +149,7 @@ class BloomFilterFacade{
 	for (size_t i=0; i < other.filter.size(); i++)
 	   filter[i] = other.filter[i] && filter[i];
     }
+
     
     void frombuffer(const std::vector<char> &buf, size_t _k, size_t n)
     {
@@ -205,6 +213,7 @@ PYBIND11_MODULE(bgdbloomfilter, m) {
 	     })
 	     .def("get_k",+[](BloomFilterFacade &self){return self.k;})
 	     .def("get_m",+[](BloomFilterFacade &self){return self.m;})
+	     .def("foz", +[](BloomFilterFacade &self){return self.foz();})
 	    
 	    ;
 
