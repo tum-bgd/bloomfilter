@@ -115,7 +115,7 @@ class BloomFilterFacade{
        for (size_t i=0; i < filter.size(); i++)
          if (filter[i])
 	   ret ++;
-	return static_cast<double> (ret) / filter.size();
+	return 1.0 - static_cast<double> (ret) / filter.size();
     }
 
   void tobuffer(std::vector<char> &buf) const
