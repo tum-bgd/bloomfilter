@@ -34,3 +34,6 @@ There are still some caveats:
 - Bloom filters do hashing on a bit-level, thus, are not compatible when moving BFs between little endian and big endian systems
 
 For whatever you do other than above and to cross-check, you can use the `dbg_getrow` function to get a representation of the actually hashed bytes. Make sure, they are what you expect.
+
+## Changelog
+- update for Compiling Windows Python 3.14
